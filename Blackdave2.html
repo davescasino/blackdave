@@ -1,34 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackdave</title>
-    <script>
-        // Adding keyboard controls
-        document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space') {
-                // HIT / DEAL / NEW ROUND actions
-                handleHitDealNewRound();
-            } else if (event.code === 'Enter') {
-                // STAND action
-                handleStand();
-            }
-        });
-
-        function handleHitDealNewRound() {
-            // Logic for HIT, DEAL, NEW ROUND
-            console.log('Hit/Deal/New Round action triggered');
+// Add keyboard event listeners
+document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+        // Check if HIT button is visible
+        if (document.getElementById('hit-button').offsetParent !== null) {
+            document.getElementById('hit-button').click();
         }
-
-        function handleStand() {
-            // Logic for STAND
-            console.log('Stand action triggered');
+        // Check if NEW ROUND button is visible
+        else if (document.getElementById('new-round-button').offsetParent !== null) {
+            document.getElementById('new-round-button').click();
         }
-    </script>
-</head>
-<body>
-    <h1>Welcome to Blackdave</h1>
-<!-- Your current content here -->
-</body>
-</html>
+        // Check if DEAL button is visible
+        else if (document.getElementById('place-bet-button').offsetParent !== null) {
+            document.getElementById('place-bet-button').click();
+        }
+    }
+    if (event.code === 'Enter') {
+        // Check if STAND button is visible
+        if (document.getElementById('stand-button').offsetParent !== null) {
+            document.getElementById('stand-button').click();
+        }
+    }
+    event.preventDefault(); // Prevent default browser behavior
+});
