@@ -1,24 +1,22 @@
-// Add keyboard event listeners
-document.addEventListener('keydown', function(event) {
+<script>
+  document.addEventListener('keydown', function(event) {
+    const hitButton = document.getElementById('hitButton');
+    const dealButton = document.getElementById('dealButton');
+    const newRoundButton = document.getElementById('newRoundButton');
+    const standButton = document.getElementById('standButton');
+
     if (event.code === 'Space') {
-        // Check if HIT button is visible
-        if (document.getElementById('hit-button').offsetParent !== null) {
-            document.getElementById('hit-button').click();
-        }
-        // Check if NEW ROUND button is visible
-        else if (document.getElementById('new-round-button').offsetParent !== null) {
-            document.getElementById('new-round-button').click();
-        }
-        // Check if DEAL button is visible
-        else if (document.getElementById('place-bet-button').offsetParent !== null) {
-            document.getElementById('place-bet-button').click();
-        }
+      if (hitButton.offsetParent !== null) { // Check if HIT button is visible
+        hitButton.click();
+      } else if (dealButton.offsetParent !== null) { // Check if DEAL button is visible
+        dealButton.click();
+      } else if (newRoundButton.offsetParent !== null) { // Check if NEW ROUND button is visible
+        newRoundButton.click();
+      }
+    } else if (event.code === 'Enter') {
+      if (standButton.offsetParent !== null) { // Check if STAND button is visible
+        standButton.click();
+      }
     }
-    if (event.code === 'Enter') {
-        // Check if STAND button is visible
-        if (document.getElementById('stand-button').offsetParent !== null) {
-            document.getElementById('stand-button').click();
-        }
-    }
-    event.preventDefault(); // Prevent default browser behavior
-});
+  });
+</script>
