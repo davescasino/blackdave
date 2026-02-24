@@ -181,15 +181,15 @@
                 <span id="chips-display" class="animated-value text-green-400">$2,000</span>
             </div>
             <!-- YouTube Player Section -->
-<div id="youtube-container" class="fixed bottom-4 right-4 w-80 h-60 bg-black rounded-lg shadow-2xl border-2 border-yellow-400 z-50">
+<div id="youtube-container" class="fixed top-1/2 -translate-y-1/2 right-4 w-96 h-96 bg-black rounded-lg shadow-2xl border-2 border-yellow-400 z-50">
     <div id="youtube-player" class="w-full h-full"></div>
     <button id="close-youtube-btn" class="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs font-bold z-51">✕</button>
 </div>
 
 <!-- YouTube Link Input (Optional) -->
 <div id="youtube-input-panel" class="fixed bottom-4 left-4 bg-gray-800 p-3 rounded-lg border-2 border-yellow-400 z-50" style="display: none;">
-    <input type="text" id="youtube-url-input" placeholder="Enter YouTube URL" class="w-full px-2 py-1 rounded text-black text-sm mb-2">
-    <button id="load-youtube-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm font-bold">Load Video</button>
+    <input type="text" id="youtube-search-input" placeholder="Search YouTube..." class="w-full px-2 py-1 rounded text-black text-sm mb-2">
+    <button id="search-youtube-btn" class="w-full bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-sm font-bold">Search</button>
 </div>
 
 <!-- Toggle Button -->
@@ -897,26 +897,13 @@ function onYouTubeIframeAPIReady() {
     youtubePlayerReady = true;
 }
 
-function getYouTubeVideoID(url) {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-}
-
-function loadYouTubeVideo(url) {
-    const videoID = getYouTubeVideoID(url);
-    
-    if (!videoID) {
-        alert('Invalid YouTube URL');
-        return;
-    }
-    
+function searchYouTube(query) {
     const youtubeContainer = document.getElementById('youtube-player');
     youtubeContainer.innerHTML = `
         <iframe 
             width="100%" 
             height="100%" 
-            src="https://www.youtube.com/embed/${videoID}?autoplay=1" 
+            src="https://www.youtube.com/embed?list_type=search&list=${encodeURIComponent(query)}" 
             frameborder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
             allowfullscreen>
@@ -932,10 +919,10 @@ document.getElementById('toggle-youtube-btn').addEventListener('click', () => {
     inputPanel.style.display = inputPanel.style.display === 'none' ? 'block' : 'none';
 });
 
-document.getElementById('load-youtube-btn').addEventListener('click', () => {
-    const url = document.getElementById('youtube-url-input').value;
-    if (url) {
-        loadYouTubeVideo(url);
+document.getElementById('search-youtube-btn').addEventListener('click', () => {
+    const query = document.getElementById('youtube-search-input').value;
+    if (query) {
+        searchYouTube(query);
         document.getElementById('youtube-input-panel').style.display = 'none';
     }
 });
