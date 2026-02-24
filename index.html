@@ -1,1 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    
+    <!-- 1. HTML Meta Redirect (Works even if JavaScript is off) -->
+    <!-- content="0; ..." means 0 seconds delay -->
+    <meta http-equiv="refresh" content="0; url=your-other-file.html">
+
+    <!-- 2. JavaScript Redirect (Faster and cleaner for modern browsers) -->
+    <script type="text/javascript">
+        window.location.replace("your-other-file.html");
+    </script>
+</head>
+<body>
+    <!-- 3. Manual Link (Backup for very old browsers or if redirect fails) -->
+    <p>If you are not redirected automatically, 
+       <a href="Blackdave.html">click here to go to the new page</a>.
+    </p>
+</body>
+</html>
 
