@@ -854,6 +854,34 @@
         updateUI(); // Renders initial chips, high score, and betting buttons
         resetRound();
     };
+    // --- Keyboard Controls ---
+document.addEventListener('keydown', function(event) {
+    // Spacebar triggers DEAL, HIT, or NEW ROUND depending on game state
+    if (event.code === 'Space') {
+        event.preventDefault(); // Prevent page scroll
+        
+        if (newGameBtn.style.display === 'block') {
+            // Game Over state - trigger NEW ROUND/RESTART
+            newGameBtn.click();
+        } else if (hitBtn.style.display !== 'none' && actionControls.style.display === 'flex') {
+            // During game - trigger HIT
+            hit();
+        } else if (placeBetBtn.style.display === 'block') {
+            // Betting state - trigger DEAL
+            placeBet();
+        }
+    }
+    
+    // Enter key triggers STAND
+    if (event.code === 'Enter') {
+        event.preventDefault(); // Prevent form submission
+        
+        if (standBtn.style.display !== 'none' && actionControls.style.display === 'flex') {
+            // During game - trigger STAND
+            stand();
+        }
+    }
+});
 // --- YouTube Integration ---
 
 let youtubePlayerReady = false;
