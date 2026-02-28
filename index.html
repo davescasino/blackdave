@@ -9,22 +9,40 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         :root { --felt-green: #386641; --dark-bg: #1a202c; --card-red: #cc0000; }
         body { font-family: 'Inter', sans-serif; background-color: var(--dark-bg); color: #e2e8f0; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; padding: 0; margin: 0; overflow: hidden; }
-        #game-container { width: 100%; height: 100%; max-width: 500px; background-color: #2d3748; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
         
-        /* Card Styling - Centered Ranks */
-        .card { 
-            width: 48px; height: 72px; background-color: white; border-radius: 0.4rem; 
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; 
-            justify-content: space-between; padding: 4px 0; font-weight: 800; color: black; 
-            user-select: none; flex-shrink: 0; line-height: 1;
+        #game-container { width: 100%; height: 100%; max-width: 500px; background-color: #2d3748; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; }
+        
+        /* 3D Card Animation Styles */
+        .card-slot { width: 48px; height: 72px; perspective: 1000px; display: inline-block; margin: 0 2px; vertical-align: middle; }
+        .card-inner { 
+            position: relative; width: 100%; height: 100%; 
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+            transform-style: preserve-3d; 
         }
-        .card-red { color: var(--card-red); }
-        .card-back { background: linear-gradient(145deg, #a73737, #d94848); border: 2px solid gold; }
-        .rank-top { font-size: 0.8rem; text-align: center; width: 100%; }
-        .suit-center { font-size: 1.5rem; text-align: center; width: 100%; }
-        .rank-bottom { font-size: 0.8rem; text-align: center; width: 100%; transform: rotate(180deg); }
+        .card-slot.flipped .card-inner { transform: rotateY(180deg); }
         
-        .hand-display { min-height: 85px; display: flex; justify-content: center; align-items: center; padding: 5px 0; overflow: hidden; }
+        .card-front, .card-back { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            border-radius: 0.4rem; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            display: flex; flex-direction: column; justify-content: space-between; 
+            padding: 2px 0; font-weight: 800; overflow: hidden;
+        }
+        
+        .card-front { background: white; color: black; transform: rotateY(180deg); }
+        .card-back { background: linear-gradient(145deg, #a73737, #d94848); border: 2px solid gold; transform: rotateY(0deg); }
+        
+        .card-red { color: var(--card-red); }
+        .rank-top { font-size: 0.75rem; text-align: center; width: 100%; line-height: 1; margin-top: 2px; }
+        .suit-center { font-size: 1.4rem; text-align: center; width: 100%; flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        .rank-bottom { font-size: 0.75rem; text-align: center; width: 100%; line-height: 1; margin-bottom: 2px; transform: rotate(180deg); }
+
+        @keyframes dealCard {
+            from { transform: translateY(-300px) rotate(25deg); opacity: 0; }
+            to { transform: translateY(0) rotate(0deg); opacity: 1; }
+        }
+        .new-card { animation: dealCard 0.4s ease-out forwards; }
+        
+        .hand-display { min-height: 85px; display: flex; justify-content: center; align-items: center; padding: 5px 0; }
         .dealer-area, .player-area { background-color: var(--felt-green); border-radius: 0.5rem; padding: 0.5rem; border: 1px solid #528c5e; height: 125px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; }
         .player-area { border: 3px solid #f6e05e; }
         
@@ -34,6 +52,11 @@
         
         input[type=range] { width: 100%; cursor: pointer; accent-color: #fbbf24; height: 12px; border-radius: 6px; outline: none; }
         .back-hub { position: absolute; top: 20px; left: 20px; padding: 10px 15px; background: #333; color: #ffd700; text-decoration: none; border-radius: 5px; font-weight: bold; border: 1px solid #ffd700; z-index: 9999; }
+
+        /* Leaderboard Scrollbar Style */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1a202c; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -82,41 +105,34 @@
         <div class="flex justify-center gap-2 mt-1">
             <button id="all-in-btn" class="bg-red-600 hover:bg-red-700 text-white px-10 py-2 rounded-lg font-black tracking-tight active:scale-95 transition">ALL IN</button>
         </div>
-    </div> 
-    <div class="flex-shrink-0 mt-2 bg-gray-900 rounded-xl border-2 border-yellow-500 overflow-hidden">
-    <div class="bg-yellow-500 py-1">
-        <h3 class="text-center font-black text-gray-900 text-xs uppercase tracking-widest">Top Daves</h3>
     </div>
-    
-    <div class="p-2 max-h-32 overflow-y-auto custom-scrollbar">
-        <table class="w-full text-xs font-bold">
-            <tbody id="leaderboard-body">
-                <tr class="border-b border-gray-800 text-yellow-400">
-                    <td class="py-1 w-8 text-center">1ST</td>
-                    <td class="py-1">Josh</td>
-                    <td class="py-1 text-right">$508,750</td>
-                </tr>
-                <tr class="border-b border-gray-800 text-gray-300">
-                    <td class="py-1 w-8 text-center">2ND</td>
-                    <td class="py-1">PLACEHOLDER_NAME_2</td>
-                    <td class="py-1 text-right">$250,000</td>
-                </tr>
-                <tr class="border-b border-gray-800 text-orange-400">
-                    <td class="py-1 w-8 text-center">3RD</td>
-                    <td class="py-1">PLACEHOLDER_NAME_3</td>
-                    <td class="py-1 text-right">$100,000</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<style>
-    /* Styling for the scrollbar to keep it looking clean */
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #1a202c; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #fbbf24; border-radius: 10px; }
-</style>
+    <div class="flex-shrink-0 mt-2 bg-gray-900 rounded-xl border-2 border-yellow-500 overflow-hidden">
+        <div class="bg-yellow-500 py-1">
+            <h3 class="text-center font-black text-gray-900 text-xs uppercase tracking-widest">Top Daves</h3>
+        </div>
+        <div class="p-2 max-h-32 overflow-y-auto custom-scrollbar">
+            <table class="w-full text-xs font-bold">
+                <tbody id="leaderboard-body">
+                    <tr class="border-b border-gray-800 text-yellow-400">
+                        <td class="py-1 w-8 text-center">1ST</td>
+                        <td class="py-1">Josh</td>
+                        <td class="py-1 text-right">$508,750</td>
+                    </tr>
+                    <tr class="border-b border-gray-800 text-gray-300">
+                        <td class="py-1 w-8 text-center">2ND</td>
+                        <td class="py-1">PLACEHOLDER_NAME_2</td>
+                        <td class="py-1 text-right">$250,000</td>
+                    </tr>
+                    <tr class="border-b border-gray-800 text-orange-400">
+                        <td class="py-1 w-8 text-center">3RD</td>
+                        <td class="py-1">PLACEHOLDER_NAME_3</td>
+                        <td class="py-1 text-right">$100,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div id="youtube-container" class="fixed top-1/2 right-5 -translate-y-1/2 w-[400px] h-[250px] bg-black rounded-xl shadow-2xl border-4 border-yellow-400 z-50" style="display:none;">
@@ -132,6 +148,7 @@
 <script>
     const SUITS = ['♥', '♦', '♣', '♠'], RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
     let chips = 2000, highScore = 2000, currentBet = 0, isGameActive = false, isDealerTurn = false;
+    let isAnimating = false;
     let deck = [], playerHand = [], dealerHand = [];
 
     const elements = {
@@ -154,6 +171,38 @@
         standBtn: document.getElementById('stand-btn'),
         doubleBtn: document.getElementById('double-btn')
     };
+
+    const sleep = (ms) => new Promise(res => setTimeout(res, ms));
+
+    function createCardElement(card, isFlipped = true, isNew = false) {
+        const slot = document.createElement('div');
+        slot.className = `card-slot ${isFlipped ? 'flipped' : ''} ${isNew ? 'new-card' : ''}`;
+        slot.innerHTML = `
+            <div class="card-inner">
+                <div class="card-back"></div>
+                <div class="card-front ${card.suit==='♥'||card.suit==='♦'?'card-red':''}">
+                    <div class="rank-top">${card.rank}</div>
+                    <div class="suit-center">${card.suit}</div>
+                    <div class="rank-bottom">${card.rank}</div>
+                </div>
+            </div>`;
+        return slot;
+    }
+
+    async function addCardToDisplay(target, hand, cardIndex, reveal = true) {
+        isAnimating = true;
+        const container = target === 'player' ? elements.pHand : elements.dHand;
+        const card = hand[cardIndex];
+        const el = createCardElement(card, reveal, true);
+        container.appendChild(el);
+        
+        if (target === 'player') elements.pScore.textContent = score(playerHand);
+        else elements.dScore.textContent = (isDealerTurn || reveal) ? score(dealerHand) : dealerHand[0].value;
+        
+        await sleep(400); 
+        el.classList.remove('new-card'); 
+        isAnimating = false;
+    }
 
     const format = (v) => '$' + Math.floor(v).toLocaleString();
 
@@ -204,97 +253,79 @@
         return s;
     }
 
-    function render(show = false) {
-        const cardHTML = (c) => `
-            <div class="card ${c.suit==='♥'||c.suit==='♦'?'card-red':''}">
-                <div class="rank-top">${c.rank}</div>
-                <div class="suit-center">${c.suit}</div>
-                <div class="rank-bottom">${c.rank}</div>
-            </div>`;
-        elements.pHand.innerHTML = playerHand.map(cardHTML).join('');
-        elements.pScore.textContent = score(playerHand);
-        if (isGameActive && !show) {
-            elements.dHand.innerHTML = cardHTML(dealerHand[0]) + `<div class="card card-back"></div>`;
-            elements.dScore.textContent = dealerHand[0].value;
-        } else {
-            elements.dHand.innerHTML = dealerHand.map(cardHTML).join('');
-            elements.dScore.textContent = score(dealerHand);
-        }
-    }
-
-    function resetRound() {
-        isGameActive = false;
-        isDealerTurn = false;
-        playerHand = []; dealerHand = [];
-        elements.actionRow.style.display = 'none';
-        elements.newRoundBtn.style.display = 'none';
-        elements.betRow.style.display = 'block';
-        elements.dealBtn.style.display = 'block';
-        elements.betControls.style.opacity = '1';
-        elements.betControls.style.pointerEvents = 'auto';
-        elements.wager.textContent = format(0);
-        updateUI();
-        render();
-        elements.msg.textContent = "Adjust bet & press SPACE.";
-    }
-
-    function placeBet() {
-        if (isGameActive || isDealerTurn) return;
+    async function placeBet() {
+        if (isGameActive || isDealerTurn || isAnimating) return;
         const amt = calculateSliderBet();
         if (amt < 10 && chips >= 10) return;
+        
         chips -= amt; currentBet = amt; isGameActive = true;
         elements.betControls.style.opacity = '0.5';
         elements.betControls.style.pointerEvents = 'none';
         elements.betRow.style.display = 'none';
-        elements.actionRow.style.display = 'flex';
         elements.wager.textContent = format(currentBet);
         elements.chips.textContent = format(chips);
+        
         createDeck();
-        playerHand = [deck.pop(), deck.pop()];
-        dealerHand = [deck.pop(), deck.pop()];
-        render();
+        playerHand = []; dealerHand = [];
+        elements.pHand.innerHTML = ''; elements.dHand.innerHTML = '';
+
+        await addCardToDisplay('player', playerHand.push(deck.pop()) && playerHand, 0);
+        await addCardToDisplay('dealer', dealerHand.push(deck.pop()) && dealerHand, 0);
+        await addCardToDisplay('player', playerHand.push(deck.pop()) && playerHand, 1);
+        
+        dealerHand.push(deck.pop());
+        const d2 = createCardElement(dealerHand[1], false, true);
+        elements.dHand.appendChild(d2);
+        isAnimating = true; await sleep(400); isAnimating = false;
+
+        elements.actionRow.style.display = 'flex';
         if (score(playerHand) === 21) end(1.5, "BLACKJACK!");
-        else if (score(dealerHand) === 21) end(-1, "Dealer Blackjack.");
+        else if (score(dealerHand) === 21) {
+            d2.classList.add('flipped');
+            end(-1, "Dealer Blackjack.");
+        }
     }
 
-    function hit() { 
-        if(!isGameActive || isDealerTurn) return; 
+    async function hit() { 
+        if(!isGameActive || isDealerTurn || isAnimating) return;
         playerHand.push(deck.pop()); 
-        render(); 
+        await addCardToDisplay('player', playerHand, playerHand.length - 1);
         if(score(playerHand) > 21) end(-1, "Bust!"); 
     }
 
     function stand() { 
-        if(!isGameActive || isDealerTurn) return; 
-        isGameActive = false; 
-        isDealerTurn = true;
+        if(!isGameActive || isDealerTurn || isAnimating) return;
+        isGameActive = false; isDealerTurn = true;
         elements.actionRow.style.display = 'none'; 
         dealerPlay(); 
     }
 
-    function double() { 
-        if(!isGameActive || isDealerTurn || chips < currentBet) return; 
-        chips -= currentBet; 
-        currentBet *= 2; 
+    async function double() { 
+        if(!isGameActive || isDealerTurn || isAnimating || chips < currentBet) return;
+        chips -= currentBet; currentBet *= 2; 
         updateUI(); 
         playerHand.push(deck.pop()); 
-        render(); 
+        await addCardToDisplay('player', playerHand, playerHand.length - 1);
         if(score(playerHand) > 21) end(-1, "Bust!"); else stand(); 
     }
 
-    function dealerPlay() {
-        render(true);
-        let loop = setInterval(() => {
-            if (score(dealerHand) < 17) { dealerHand.push(deck.pop()); render(true); }
-            else { 
-                clearInterval(loop); 
-                let ps = score(playerHand), ds = score(dealerHand);
-                if (ds > 21 || ps > ds) end(1, "You win!");
-                else if (ps < ds) end(-1, "Dealer wins.");
-                else end(0, "Push!");
-                isDealerTurn = false; // Release turn lock after result is shown
-            }
-        }, 800);
+    async function dealerPlay() {
+        const holeCard = elements.dHand.children[1];
+        holeCard.classList.add('flipped');
+        isAnimating = true; await sleep(600); isAnimating = false;
+        elements.dScore.textContent = score(dealerHand);
+        await sleep(200);
+
+        while (score(dealerHand) < 17) {
+            dealerHand.push(deck.pop());
+            await addCardToDisplay('dealer', dealerHand, dealerHand.length - 1);
+        }
+        
+        let ps = score(playerHand), ds = score(dealerHand);
+        if (ds > 21 || ps > ds) end(1, "You win!");
+        else if (ps < ds) end(-1, "Dealer wins.");
+        else end(0, "Push!");
+        isDealerTurn = false;
     }
 
     function end(m, txt) {
@@ -315,22 +346,34 @@
         }
     }
 
-    // Keyboard Control with State Guards
+    function resetRound() {
+        isGameActive = false; isDealerTurn = false; isAnimating = false;
+        playerHand = []; dealerHand = [];
+        elements.pHand.innerHTML = ''; elements.dHand.innerHTML = '';
+        elements.pScore.textContent = '0'; elements.dScore.textContent = '?';
+        elements.actionRow.style.display = 'none';
+        elements.newRoundBtn.style.display = 'none';
+        elements.betRow.style.display = 'block';
+        elements.dealBtn.style.display = 'block';
+        elements.betControls.style.opacity = '1';
+        elements.betControls.style.pointerEvents = 'auto';
+        elements.wager.textContent = format(0);
+        updateUI();
+        elements.msg.textContent = "Adjust bet & press SPACE.";
+    }
+
     document.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
+        if (e.repeat || isAnimating) return;
+        
         if (e.code === 'Space') {
             e.preventDefault();
-            // Prevent Space from doing anything while dealer is moving
             if (isDealerTurn) return;
-
             if (elements.newRoundBtn.style.display === 'block') elements.newRoundBtn.click();
             else if (isGameActive) hit();
             else if (elements.dealBtn.style.display === 'block') placeBet();
         }
-        if (e.code === 'Enter' && isGameActive && !isDealerTurn) { 
-            e.preventDefault(); 
-            stand(); 
-        }
+        if (e.code === 'Enter' && isGameActive && !isDealerTurn) stand();
         if (e.key.toLowerCase() === 'd' && isGameActive && !isDealerTurn) double();
     });
 
@@ -339,7 +382,6 @@
     elements.standBtn.onclick = stand;
     elements.doubleBtn.onclick = double;
 
-    // YouTube Controller
     document.getElementById('toggle-youtube-btn').onclick = () => {
         const p = document.getElementById('youtube-input-panel');
         p.style.display = p.style.display === 'none' ? 'block' : 'none';
